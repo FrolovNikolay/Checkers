@@ -15,7 +15,7 @@ public:
     bool Create();
 
     // показать окно
-    void Show(int cmdShow) const;
+    void Show( int cmdShow ) const;
 
 protected:
     void OnDestroy() const;
