@@ -1,10 +1,10 @@
-// Автор: Николай Фролов.
+п»ї// РђРІС‚РѕСЂ: РќРёРєРѕР»Р°Р№ Р¤СЂРѕР»РѕРІ.
 
 #include <Board.h>
 #include <cassert>
 
 CBoard::CBoard()
-	: board( std::vector<CChecker*> ( boardSize * boardSize / 2,  0 ) )
+	: board( std::vector<CChecker*> ( BoardSize * BoardSize / 2,  0 ) )
 {
 	createNewCheckers();
 }
@@ -16,9 +16,9 @@ CBoard::~CBoard()
 
 void CBoard::MakeTurn( int from, int to )
 {
-	// Если в поле from нет шашки, значит что-то пошло не так.
+	// Р•СЃР»Рё РІ РїРѕР»Рµ from РЅРµС‚ С€Р°С€РєРё, Р·РЅР°С‡РёС‚ С‡С‚Рѕ-С‚Рѕ РїРѕС€Р»Рѕ РЅРµ С‚Р°Рє.
 	assert( board[to] != 0 );
-	// Если в поле to стоит шашка, значит что-то пошло не так.
+	// Р•СЃР»Рё РІ РїРѕР»Рµ to СЃС‚РѕРёС‚ С€Р°С€РєР°, Р·РЅР°С‡РёС‚ С‡С‚Рѕ-С‚Рѕ РїРѕС€Р»Рѕ РЅРµ С‚Р°Рє.
 	assert( board[from] == 0 );
 
 	std::swap( board[to], board[from] );
@@ -30,21 +30,21 @@ void CBoard::Reset()
 	createNewCheckers();
 }
 
-// Добавить на поле новые шашки.
+// Р”РѕР±Р°РІРёС‚СЊ РЅР° РїРѕР»Рµ РЅРѕРІС‹Рµ С€Р°С€РєРё.
 void CBoard::createNewCheckers()
 {
-	// Добавляем шашки для чёрной стороны.
+	// Р”РѕР±Р°РІР»СЏРµРј С€Р°С€РєРё РґР»СЏ С‡С‘СЂРЅРѕР№ СЃС‚РѕСЂРѕРЅС‹.
 	for( size_t i = 0; i < startNumberOfCheckers; ++i ) {
 		board[i] = new CChecker( false, false );
 	}
 
-	// Добавляем шашки для белой стороны.
+	// Р”РѕР±Р°РІР»СЏРµРј С€Р°С€РєРё РґР»СЏ Р±РµР»РѕР№ СЃС‚РѕСЂРѕРЅС‹.
 	for( size_t i = board.size() - startNumberOfCheckers; i < board.size(); ++i ) {
 		board[i] = new CChecker( true, false );
 	}
 }
 
-// Очистить поле от шашек.
+// РћС‡РёСЃС‚РёС‚СЊ РїРѕР»Рµ РѕС‚ С€Р°С€РµРє.
 void CBoard::deleteAllCheckers()
 {
 	for( size_t i = 0; i < board.size(); ++i ) {

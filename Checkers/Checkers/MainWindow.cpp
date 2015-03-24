@@ -2,6 +2,11 @@
 
 #include <MainWindow.h>
 
+CMainWindow::CMainWindow()
+	: board()
+	, fields( CBoard::BoardSize * CBoard::BoardSize / 2 )
+{ }
+
 bool CMainWindow::RegisterClass()
 {
     WNDCLASSEX windowWND;
@@ -14,7 +19,7 @@ bool CMainWindow::RegisterClass()
     windowWND.hInstance = static_cast<HINSTANCE>( GetModuleHandle( 0 ) );
     windowWND.hIcon = 0;
     windowWND.hCursor = ::LoadCursor( 0, IDC_ARROW );
-    windowWND.hbrBackground = reinterpret_cast<HBRUSH>( COLOR_GRAYTEXT + 1 );
+    windowWND.hbrBackground = reinterpret_cast<HBRUSH>( COLOR_WINDOW + 1);
     windowWND.lpszMenuName = 0;
     windowWND.lpszClassName = L"CMainWindow";
     windowWND.hIconSm = 0;
@@ -25,8 +30,8 @@ bool CMainWindow::RegisterClass()
 
 bool CMainWindow::Create()
 {
-    handle = ::CreateWindowEx( 0, L"CMainWindow", L"Checkers", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
-        CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, static_cast<HINSTANCE>( ::GetModuleHandle( 0 ) ), this );
+    handle = ::CreateWindowEx( 0, L"CMainWindow", L"Checkers", WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+		0, 0, width, height, 0, 0, static_cast<HINSTANCE>( ::GetModuleHandle( 0 ) ), this );
 
     return handle != 0;
 }
@@ -34,6 +39,9 @@ bool CMainWindow::Create()
 void CMainWindow::Show( int cmdShow ) const
 {
     ::ShowWindow( handle, cmdShow );
+	for( size_t i = 0; i < fields.size(); ++i ) {
+		fields[i].Show( cmdShow );
+	}
 }
 
 void CMainWindow::OnDestroy() const
@@ -41,18 +49,33 @@ void CMainWindow::OnDestroy() const
     ::PostQuitMessage( 0 );
 }
 
-LRESULT __stdcall CMainWindow::windowProc( HWND handle, UINT message, WPARAM wParam, LPARAM lParam )
+void CMainWindow::createChildren( HWND hwnd )
 {
+	size_t numberOfCheckersInOneLine = CBoard::BoardSize / 2;
+	for( size_t i = 0; i < fields.size(); ++i ) {
+		int xStart = ( ( i % numberOfCheckersInOneLine ) * 2 + ( ( i / numberOfCheckersInOneLine + 1 ) % 2 ) ) * fieldSize;
+		int yStart = i / numberOfCheckersInOneLine * fieldSize;
+		fields[i].Create( hwnd, xStart, yStart, fieldSize, fieldSize );
+	}
+}
+
+LRESULT __stdcall CMainWindow::windowProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
+{
+	CMainWindow* window = reinterpret_cast<CMainWindow*>( ::GetWindowLong( hwnd, GWL_USERDATA ) );
+
     switch( message ) {
 		case WM_NCCREATE:
-			::SetWindowLong( handle, GWL_USERDATA, reinterpret_cast<LONG>( reinterpret_cast<CREATESTRUCT*>( lParam )->lpCreateParams ) );
-			return ::DefWindowProc( handle, message, wParam, lParam );
+			::SetWindowLong( hwnd, GWL_USERDATA, reinterpret_cast<LONG>( reinterpret_cast<CREATESTRUCT*>( lParam )->lpCreateParams ) );
+			return ::DefWindowProc( hwnd, message, wParam, lParam );
 			break;
+		case WM_CREATE:
+            window->createChildren( hwnd );
+			return 1;
 		case WM_DESTROY:
-			reinterpret_cast<CMainWindow*>( ::GetWindowLong( handle, GWL_USERDATA ) )->OnDestroy();
+			window->OnDestroy();
 			break;
 		default:
-			return ::DefWindowProc( handle, message, wParam, lParam );
+			return ::DefWindowProc( hwnd, message, wParam, lParam );
 			break;
     }
     return 0;
