@@ -4,8 +4,12 @@
 
 CMainWindow::CMainWindow()
 	: board()
-	, fields( CBoard::BoardSize * CBoard::BoardSize / 2 )
-{ }
+	, fields()
+{
+	for( size_t  i = 0; i < CBoard::BoardSize * CBoard::BoardSize / 2; ++i ) {
+		fields.push_back( CFieldWindow( board.GetBoard()[i] ) );
+	}
+}
 
 bool CMainWindow::RegisterClass()
 {
@@ -13,13 +17,13 @@ bool CMainWindow::RegisterClass()
 
     windowWND.cbSize = sizeof( WNDCLASSEX );
     windowWND.style = CS_HREDRAW | CS_VREDRAW;
-    windowWND.lpfnWndProc = windowProc;
+    windowWND.lpfnWndProc = mainWindowProc;
     windowWND.cbClsExtra = 0;
     windowWND.cbWndExtra = 0;
     windowWND.hInstance = static_cast<HINSTANCE>( GetModuleHandle( 0 ) );
     windowWND.hIcon = 0;
     windowWND.hCursor = ::LoadCursor( 0, IDC_ARROW );
-    windowWND.hbrBackground = reinterpret_cast<HBRUSH>( COLOR_WINDOW + 1);
+    windowWND.hbrBackground = ::CreateSolidBrush( RGB( 207, 236, 255 ) );
     windowWND.lpszMenuName = 0;
     windowWND.lpszClassName = L"CMainWindow";
     windowWND.hIconSm = 0;
@@ -59,7 +63,7 @@ void CMainWindow::createChildren( HWND hwnd )
 	}
 }
 
-LRESULT __stdcall CMainWindow::windowProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT __stdcall CMainWindow::mainWindowProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	CMainWindow* window = reinterpret_cast<CMainWindow*>( ::GetWindowLong( hwnd, GWL_USERDATA ) );
 

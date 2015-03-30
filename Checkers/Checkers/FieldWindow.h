@@ -5,9 +5,13 @@
 #pragma once
 
 #include <Windows.h>
+#include <Checker.h>
+#include <FieldDrawer.h>
 
 class CFieldWindow {
 public:
+	CFieldWindow( const CChecker* const & field );
+
 	// регистрация класса окна
     static bool RegisterClass();
 
@@ -20,8 +24,14 @@ public:
 protected:
     void OnDestroy() const;
 
+	void OnPaint() const;
+
 private:
     HWND handle;
 
-    static LRESULT __stdcall windowProc( HWND hanlde, UINT message, WPARAM wParam, LPARAM lParam );
+	static const CFieldDrawer drawer;
+
+	const CChecker* const & windowField;
+
+    static LRESULT __stdcall fieldWindowProc( HWND hanlde, UINT message, WPARAM wParam, LPARAM lParam );
 };

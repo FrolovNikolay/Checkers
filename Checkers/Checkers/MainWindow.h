@@ -40,5 +40,5 @@ private:
 
 	void createChildren( HWND hwnd );
 
-    static LRESULT __stdcall windowProc( HWND hanlde, UINT message, WPARAM wParam, LPARAM lParam );
+    static LRESULT __stdcall mainWindowProc( HWND hanlde, UINT message, WPARAM wParam, LPARAM lParam );
 };

@@ -1,6 +1,13 @@
 ﻿// Автор: Фролов Николай.
 
 #include <FieldWindow.h>
+#include <FieldDrawer.h>
+
+const CFieldDrawer CFieldWindow::drawer = CFieldDrawer();
+
+CFieldWindow::CFieldWindow( const CChecker* const & field )
+	: windowField( field )
+{ }
 
 bool CFieldWindow::RegisterClass()
 {
@@ -8,13 +15,13 @@ bool CFieldWindow::RegisterClass()
 
 	windowWND.cbSize = sizeof( WNDCLASSEX );
 	windowWND.style = CS_HREDRAW | CS_VREDRAW;
-	windowWND.lpfnWndProc = windowProc;
+	windowWND.lpfnWndProc = fieldWindowProc;
 	windowWND.cbClsExtra = 0;
 	windowWND.cbWndExtra = 0;
 	windowWND.hInstance = static_cast<HINSTANCE>( GetModuleHandle( 0 ) );
 	windowWND.hIcon = 0;
 	windowWND.hCursor = ::LoadCursor( 0, IDC_ARROW );
-	windowWND.hbrBackground = reinterpret_cast<HBRUSH>( COLOR_GRAYTEXT + 1);
+	windowWND.hbrBackground = 0;
 	windowWND.lpszMenuName = 0;
 	windowWND.lpszClassName = L"CFieldWindow";
 	windowWND.hIconSm = 0;
@@ -40,16 +47,23 @@ void CFieldWindow::OnDestroy() const
 	::PostQuitMessage( 0 );
 }
 
-LRESULT __stdcall CFieldWindow::windowProc( HWND handle, UINT message, WPARAM wParam, LPARAM lParam ) 
+void CFieldWindow::OnPaint() const
+{
+	drawer.DrawField( handle, windowField );
+}
+
+LRESULT __stdcall CFieldWindow::fieldWindowProc( HWND handle, UINT message, WPARAM wParam, LPARAM lParam ) 
 {
 	CFieldWindow* window = reinterpret_cast<CFieldWindow*>( ::GetWindowLong( handle, GWL_USERDATA ) );
 	switch( message ) {
 		case WM_NCCREATE:
 			::SetWindowLong( handle, GWL_USERDATA, reinterpret_cast<LONG>( reinterpret_cast<CREATESTRUCT*>( lParam )->lpCreateParams ) );
 			return 1;
-			break;
 		case WM_DESTROY:
 			window->OnDestroy();
+			break;
+		case WM_PAINT:
+			window->OnPaint();
 			break;
 		default:
 			return ::DefWindowProc( handle, message, wParam, lParam );
