@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Checker.h>
+#include <Field.h>
 #include <vector>
 
 class CBoard {
@@ -13,12 +13,9 @@ public:
 	static const size_t BoardSize = 10;
 
 	CBoard();
-	~CBoard();
 
-	const std::vector<CChecker*>& GetBoard() const { return board; };
+	std::vector<CField>& GetBoard() { return playBoard; };
 
-	// Совершить ход или его часть(в случае, если происходит множественное взятие) передвинув шашку с позиции from на позицию to.
-	void MakeTurn( int from, int to );
 	// Вернуть доску в стартовое состояние для начала новой игры.
 	void Reset();
 
@@ -27,11 +24,7 @@ private:
 	static const size_t startNumberOfCheckers = 20;
 
 	// Описывает поле для игры - в игре участвует всего 50 клеток, которые нумеруются в соответствии с определенными правилами.
-	std::vector<CChecker*> board;
+	std::vector<CField> playBoard;
 
-	// Добавить на поле новые шашки.
-	void createNewCheckers();
-
-	// Очистить поле от шашек.
-	void deleteAllCheckers();
+	void generateNewBoard();
 };

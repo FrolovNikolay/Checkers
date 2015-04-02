@@ -9,20 +9,29 @@ CFieldDrawer::CFieldDrawer()
 	kingWhiteBrush = ::CreateSolidBrush( RGB( 255, 255, 255 ) );
 	blackBrush = ::CreateSolidBrush( RGB( 102, 102, 102 ) );
 	kingBlackBrush = ::CreateSolidBrush( RGB( 51, 51, 51 ) );
+
 	backgroundBrush = ::CreateSolidBrush( RGB( 85, 102, 114 ) ) ;
+	backgroundPen = ::CreatePen( PS_SOLID, 10, RGB( 85, 102, 114 ) );
+
+	focusedPen = ::CreatePen( PS_SOLID, 5, RGB( 51, 255, 0 ) );
+	availablePen = ::CreatePen( PS_SOLID, 5, RGB( 255, 255, 0 ) );
 }
 
 CFieldDrawer::~CFieldDrawer()
 {
-	
 	::DeleteObject( whiteBrush );
 	::DeleteObject( kingWhiteBrush );
 	::DeleteObject( blackBrush );
 	::DeleteObject( kingBlackBrush );
+
 	::DeleteObject( backgroundBrush );
+	::DeleteObject( backgroundPen );
+
+	::DeleteObject( focusedPen );
+	::DeleteObject( availablePen );
 }
 
-void CFieldDrawer::DrawField( HWND window, const CChecker* const field ) const
+void CFieldDrawer::DrawField( HWND window, const CField& field ) const
 {
 	PAINTSTRUCT paintInfo;
 	HDC displayHandle = ::BeginPaint( window, &paintInfo );
@@ -36,30 +45,68 @@ void CFieldDrawer::DrawField( HWND window, const CChecker* const field ) const
 	HBITMAP tempBitmap = ::CreateCompatibleBitmap( displayHandle, width, height );
 	HBITMAP oldBitmap = static_cast<HBITMAP>( ::SelectObject( tempHDC, tempBitmap ) );
 
-	HBRUSH oldBgBrush = static_cast<HBRUSH>( ::SelectObject( tempHDC, backgroundBrush ) );
-	Rectangle( tempHDC, 0, 0, width, height );
-	if( field != 0 ) {
-		if( field->IsWhite() ) {
-			::SelectObject( tempHDC, whiteBrush );
-		} else {
-			::SelectObject( tempHDC, blackBrush );
-		}
-		::Ellipse( tempHDC, 0, 0, width, height );
-		if( field->IsKing() ) {
-			if( field->IsWhite() ) {
-			::SelectObject( tempHDC, kingWhiteBrush );
-		} else {
-			::SelectObject( tempHDC, kingBlackBrush );
-		}
-			::Ellipse( tempHDC, indent, indent, width - indent, height - indent );
-		}
-	}
-
-	::SelectObject( tempHDC, oldBgBrush );
+	drawBackground( window, tempHDC, field, rectInfo );
+	drawChecker( tempHDC, field, rectInfo );
+	
 	::BitBlt( displayHandle, 0, 0, width, height, tempHDC, 0, 0, SRCCOPY );
 
 	::DeleteObject( oldBitmap );
-	::DeleteObject( tempHDC );
 	::DeleteObject( tempBitmap );
+	::DeleteObject( tempHDC );
 	::EndPaint( window, &paintInfo );
+}
+
+// Отрисовка фона игрового поля.
+void CFieldDrawer::drawBackground( HWND window, HDC tempHDC, const CField& field, RECT rectInfo ) const
+{
+	int width = rectInfo.right;
+	int height = rectInfo.bottom;
+
+	HBRUSH oldBrush = static_cast<HBRUSH>( ::SelectObject( tempHDC, backgroundBrush ) );
+	HPEN oldPen;
+	if( field.HasBorder ) {
+		// Если у поля есть обводка, то ее цвет зависит от того, нажимал на нее пользователь или нет.
+		if( window == ::GetFocus() ) {
+			oldPen = static_cast<HPEN>( ::SelectObject( tempHDC, focusedPen ) );
+		} else {
+			oldPen = static_cast<HPEN>( ::SelectObject( tempHDC, availablePen ) );
+		}
+	} else {
+		// Если обводки нет, то цвет рамки тот же, что и цвет фона клетки.
+		oldPen = static_cast<HPEN>( ::SelectObject( tempHDC, backgroundPen ) );
+	}
+	Rectangle( tempHDC, 0, 0, width, height );
+
+	::SelectObject( tempHDC, oldPen );
+	::SelectObject( tempHDC, oldBrush );
+}
+
+// Отрисовка шашки в игровом поле.
+void CFieldDrawer::drawChecker( HDC tempHDC, const CField& field, RECT rectInfo ) const
+{
+	if( field.Condition != FC_Empty ) {
+		HBRUSH oldBrush;
+		int width = rectInfo.right;
+		int height = rectInfo.bottom;
+
+		// Определяем цвет шашки.
+		if( field.Condition == FC_WhiteChecker ) {
+			oldBrush = static_cast<HBRUSH>( ::SelectObject( tempHDC, whiteBrush ) );
+		} else {
+			oldBrush = static_cast<HBRUSH>( ::SelectObject( tempHDC, blackBrush ) );
+		}
+		::Ellipse( tempHDC, baseIndent, baseIndent, width - baseIndent, height - baseIndent );
+
+		// Если это дамка, то делаем дополнительную отрисовку в зависимости от цвета шашки.
+		if( field.IsKing ) {
+			if( field.Condition == FC_WhiteChecker ) {
+				::SelectObject( tempHDC, kingWhiteBrush );
+			} else {
+				::SelectObject( tempHDC, kingBlackBrush );
+			}
+			::Ellipse( tempHDC, baseIndent + kingIndent, baseIndent + kingIndent, width - baseIndent - kingIndent, height - baseIndent - kingIndent );
+		}
+
+		::SelectObject( tempHDC, oldBrush );
+	}
 }

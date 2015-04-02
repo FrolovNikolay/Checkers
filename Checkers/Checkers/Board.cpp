@@ -4,52 +4,26 @@
 #include <cassert>
 
 CBoard::CBoard()
-	: board( std::vector<CChecker*> ( BoardSize * BoardSize / 2,  0 ) )
 {
-	createNewCheckers();
-}
-
-CBoard::~CBoard()
-{
-	deleteAllCheckers();
-}
-
-void CBoard::MakeTurn( int from, int to )
-{
-	// Если в поле from нет шашки, значит что-то пошло не так.
-	assert( board[to] != 0 );
-	// Если в поле to стоит шашка, значит что-то пошло не так.
-	assert( board[from] == 0 );
-
-	std::swap( board[to], board[from] );
+	generateNewBoard();
 }
 
 void CBoard::Reset()
 {
-	deleteAllCheckers();
-	createNewCheckers();
+	generateNewBoard();
 }
 
-// Добавить на поле новые шашки.
-void CBoard::createNewCheckers()
+// Создание доски для новой игры.
+void CBoard::generateNewBoard()
 {
-	// Добавляем шашки для чёрной стороны.
+	playBoard.clear();
+
+	for( size_t i = 0; i < CBoard::BoardSize * CBoard::BoardSize / 2; ++i ) {
+		playBoard.push_back( CField( i ) );
+	}
+
 	for( size_t i = 0; i < startNumberOfCheckers; ++i ) {
-		board[i] = new CChecker( false, false );
-	}
-
-	// Добавляем шашки для белой стороны.
-	for( size_t i = board.size() - startNumberOfCheckers; i < board.size(); ++i ) {
-		board[i] = new CChecker( true, false );
-	}
-}
-
-// Очистить поле от шашек.
-void CBoard::deleteAllCheckers()
-{
-	for( size_t i = 0; i < board.size(); ++i ) {
-		if( board[i] != 0 ) {
-			delete board[i];
-		}
+		playBoard[i].Condition = FC_BlackChecker;
+		playBoard[playBoard.size() - 1 - i].Condition = FC_WhiteChecker;
 	}
 }

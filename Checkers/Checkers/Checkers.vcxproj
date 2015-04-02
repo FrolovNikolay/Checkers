@@ -67,6 +67,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Board.cpp" />
+    <ClCompile Include="CheckersEngine.cpp" />
     <ClCompile Include="FieldDrawer.cpp" />
     <ClCompile Include="FieldWindow.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -74,7 +75,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
-    <ClInclude Include="Checker.h" />
+    <ClInclude Include="Field.h" />
+    <ClInclude Include="CheckersEngine.h" />
     <ClInclude Include="FieldDrawer.h" />
     <ClInclude Include="FieldWindow.h" />
     <ClInclude Include="MainWindow.h" />

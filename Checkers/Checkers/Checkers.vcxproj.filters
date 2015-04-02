@@ -30,6 +30,9 @@
     <ClCompile Include="FieldDrawer.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
+    <ClCompile Include="CheckersEngine.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainWindow.h">
@@ -38,13 +41,16 @@
     <ClInclude Include="Board.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="Checker.h">
-      <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
     <ClInclude Include="FieldWindow.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
     <ClInclude Include="FieldDrawer.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckersEngine.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="Field.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
   </ItemGroup>

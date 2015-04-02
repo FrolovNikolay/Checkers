@@ -27,9 +27,12 @@ protected:
     void OnDestroy() const;
 
 private:
+	// Описатель данного окна.
     HWND handle;
 
-	static const int fieldSize = 60;
+	// Размер одного поля.
+	static const int fieldSize = 65;
+	// Высота и ширина окна.
 	static const int height = CBoard::BoardSize * fieldSize + 30;
 	static const int width = CBoard::BoardSize * fieldSize + 200;
 	

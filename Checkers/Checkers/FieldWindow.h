@@ -5,20 +5,19 @@
 #pragma once
 
 #include <Windows.h>
-#include <Checker.h>
+#include <Field.h>
 #include <FieldDrawer.h>
 
 class CFieldWindow {
 public:
-	CFieldWindow( const CChecker* const & field );
-
-	// регистрация класса окна
+	CFieldWindow( const CField& field );
+	// Регистрация класса окна.
     static bool RegisterClass();
 
-    // создание экземпляра окна
+    // Создание экземпляра окна.
     bool Create( HWND parent, int x, int y, int cx, int cy );
 
-    // показать окно
+    // Показать окно.
     void Show( int cmdShow ) const;
 
 protected:
@@ -27,11 +26,13 @@ protected:
 	void OnPaint() const;
 
 private:
+	// Описатель данного окна.
     HWND handle;
 
+	// Класс-механизм отрисовки для данного типа окон
 	static const CFieldDrawer drawer;
-
-	const CChecker* const & windowField;
+	// Соответствующее данному окну игровое поле.
+	const CField& windowField;
 
     static LRESULT __stdcall fieldWindowProc( HWND hanlde, UINT message, WPARAM wParam, LPARAM lParam );
 };

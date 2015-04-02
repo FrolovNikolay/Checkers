@@ -13,8 +13,7 @@ int _stdcall wWinMain( HINSTANCE hInstance, HINSTANCE prevInstance, LPWSTR comma
     mainWindow.Create();
     mainWindow.Show( nCmdShow );
     MSG msg;
-    while( ::GetMessage( &msg, 0, 0, 0 ) != 0 )
-	{
+    while( ::GetMessage( &msg, 0, 0, 0 ) != 0 ) {
         ::TranslateMessage( &msg );
         ::DispatchMessage( &msg );
     }

@@ -53,6 +53,7 @@ void CMainWindow::OnDestroy() const
     ::PostQuitMessage( 0 );
 }
 
+// Генерация дочерних окон на основе массива игровых полей.
 void CMainWindow::createChildren( HWND hwnd )
 {
 	size_t numberOfCheckersInOneLine = CBoard::BoardSize / 2;

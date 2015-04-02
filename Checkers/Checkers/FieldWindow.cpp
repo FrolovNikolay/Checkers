@@ -5,7 +5,7 @@
 
 const CFieldDrawer CFieldWindow::drawer = CFieldDrawer();
 
-CFieldWindow::CFieldWindow( const CChecker* const & field )
+CFieldWindow::CFieldWindow( const CField& field )
 	: windowField( field )
 { }
 
@@ -64,6 +64,13 @@ LRESULT __stdcall CFieldWindow::fieldWindowProc( HWND handle, UINT message, WPAR
 			break;
 		case WM_PAINT:
 			window->OnPaint();
+			break;
+		case WM_LBUTTONDOWN:
+			::SetFocus( handle );
+			::InvalidateRect( handle, 0, true );
+			break;
+		case WM_KILLFOCUS:
+			::InvalidateRect( handle, 0, true );
 			break;
 		default:
 			return ::DefWindowProc( handle, message, wParam, lParam );
