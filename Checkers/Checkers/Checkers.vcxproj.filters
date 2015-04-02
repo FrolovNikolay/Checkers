@@ -47,10 +47,10 @@
     <ClInclude Include="FieldDrawer.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="CheckersEngine.h">
+    <ClInclude Include="Field.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="Field.h">
+    <ClInclude Include="CheckersEngine.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
   </ItemGroup>

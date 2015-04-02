@@ -31,10 +31,10 @@ CFieldDrawer::~CFieldDrawer()
 	::DeleteObject( availablePen );
 }
 
-void CFieldDrawer::DrawField( HWND window, const CField& field ) const
+void CFieldDrawer::DrawField( const CField& field ) const
 {
 	PAINTSTRUCT paintInfo;
-	HDC displayHandle = ::BeginPaint( window, &paintInfo );
+	HDC displayHandle = ::BeginPaint( field.Window, &paintInfo );
 	assert( displayHandle != 0 );
 
 	RECT rectInfo = paintInfo.rcPaint;
@@ -45,19 +45,19 @@ void CFieldDrawer::DrawField( HWND window, const CField& field ) const
 	HBITMAP tempBitmap = ::CreateCompatibleBitmap( displayHandle, width, height );
 	HBITMAP oldBitmap = static_cast<HBITMAP>( ::SelectObject( tempHDC, tempBitmap ) );
 
-	drawBackground( window, tempHDC, field, rectInfo );
-	drawChecker( tempHDC, field, rectInfo );
+	drawBackground( field, tempHDC, rectInfo );
+	drawChecker( field, tempHDC, rectInfo );
 	
 	::BitBlt( displayHandle, 0, 0, width, height, tempHDC, 0, 0, SRCCOPY );
 
 	::DeleteObject( oldBitmap );
 	::DeleteObject( tempBitmap );
 	::DeleteObject( tempHDC );
-	::EndPaint( window, &paintInfo );
+	::EndPaint( field.Window, &paintInfo );
 }
 
 // Отрисовка фона игрового поля.
-void CFieldDrawer::drawBackground( HWND window, HDC tempHDC, const CField& field, RECT rectInfo ) const
+void CFieldDrawer::drawBackground( const CField& field, HDC tempHDC, RECT rectInfo ) const
 {
 	int width = rectInfo.right;
 	int height = rectInfo.bottom;
@@ -66,7 +66,7 @@ void CFieldDrawer::drawBackground( HWND window, HDC tempHDC, const CField& field
 	HPEN oldPen;
 	if( field.HasBorder ) {
 		// Если у поля есть обводка, то ее цвет зависит от того, нажимал на нее пользователь или нет.
-		if( window == ::GetFocus() ) {
+		if( field.Window == ::GetFocus() ) {
 			oldPen = static_cast<HPEN>( ::SelectObject( tempHDC, focusedPen ) );
 		} else {
 			oldPen = static_cast<HPEN>( ::SelectObject( tempHDC, availablePen ) );
@@ -82,7 +82,7 @@ void CFieldDrawer::drawBackground( HWND window, HDC tempHDC, const CField& field
 }
 
 // Отрисовка шашки в игровом поле.
-void CFieldDrawer::drawChecker( HDC tempHDC, const CField& field, RECT rectInfo ) const
+void CFieldDrawer::drawChecker( const CField& field, HDC tempHDC, RECT rectInfo ) const
 {
 	if( field.Condition != FC_Empty ) {
 		HBRUSH oldBrush;

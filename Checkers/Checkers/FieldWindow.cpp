@@ -5,8 +5,10 @@
 
 const CFieldDrawer CFieldWindow::drawer = CFieldDrawer();
 
-CFieldWindow::CFieldWindow( const CField& field )
+CFieldWindow::CFieldWindow( CField& field, int& _focusedWindowIdx, CCheckersEngine& _engine )
 	: windowField( field )
+	, focusedWindowIdx( _focusedWindowIdx )
+	, engine( _engine )
 { }
 
 bool CFieldWindow::RegisterClass()
@@ -34,6 +36,8 @@ bool CFieldWindow::Create( HWND parent, int x, int y, int cx, int cy )
 	handle = ::CreateWindowEx( 0, L"CFieldWindow", L"CFieldWindow", WS_CHILD, x, y, cx, cy, parent, 0,
 		static_cast<HINSTANCE>( ::GetModuleHandle( 0 ) ), this );
 
+	windowField.Window = handle;
+
 	return handle != 0;
 }
 
@@ -49,7 +53,32 @@ void CFieldWindow::OnDestroy() const
 
 void CFieldWindow::OnPaint() const
 {
-	drawer.DrawField( handle, windowField );
+	drawer.DrawField( windowField );
+}
+
+void CFieldWindow::OnLButtonDown() const
+{
+	if( windowField.HasBorder ) {
+		if( focusedWindowIdx != -1 && focusedWindowIdx != windowField.Name ) {
+			engine.TryTurn( focusedWindowIdx, windowField.Name );
+		}
+		if( windowField.HasBorder ) {
+			::SetFocus( handle );
+			focusedWindowIdx = windowField.Name;
+			engine.AddFocus( focusedWindowIdx );
+		} else {
+			engine.DelFocus( focusedWindowIdx );
+			focusedWindowIdx = -1;
+		}
+	}
+}
+
+void CFieldWindow::OnKillFocus() const
+{
+	if( focusedWindowIdx == windowField.Name ) {
+		focusedWindowIdx = -1;
+	}
+	engine.DelFocus( windowField.Name );
 }
 
 LRESULT __stdcall CFieldWindow::fieldWindowProc( HWND handle, UINT message, WPARAM wParam, LPARAM lParam ) 
@@ -66,11 +95,10 @@ LRESULT __stdcall CFieldWindow::fieldWindowProc( HWND handle, UINT message, WPAR
 			window->OnPaint();
 			break;
 		case WM_LBUTTONDOWN:
-			::SetFocus( handle );
-			::InvalidateRect( handle, 0, true );
+			window->OnLButtonDown();
 			break;
 		case WM_KILLFOCUS:
-			::InvalidateRect( handle, 0, true );
+			window->OnKillFocus();
 			break;
 		default:
 			return ::DefWindowProc( handle, message, wParam, lParam );

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <Windows.h>
+
 enum FieldCondition {
 	FC_Empty,
 	FC_WhiteChecker,
@@ -12,11 +14,12 @@ enum FieldCondition {
 
 struct CField {
 public:
-	CField( int name, FieldCondition condition = FC_Empty, bool isKing = false, bool hasBorder = false )
-		: Name( name )
-		, Condition( condition )
-		, IsKing( isKing )
-		, HasBorder( hasBorder )
+	CField( int _Name, FieldCondition _Condition = FC_Empty, bool _IsKing = false, bool _HasBorder = false,
+			HWND window = 0 )
+		: Name( _Name )
+		, Condition( _Condition )
+		, IsKing( _IsKing )
+		, HasBorder( _HasBorder )
 	{ }
 
 	// Номер поля на доске.
@@ -27,4 +30,6 @@ public:
 	bool IsKing;
 	// Выделено ли данное поле, как одно из возможных для хода.
 	bool HasBorder;
+	// Окно, в котором отображается данное поле.
+	HWND Window;
 };

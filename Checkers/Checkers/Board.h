@@ -10,9 +10,9 @@
 class CBoard {
 public:
 	// Размер доски.
-	static const size_t BoardSize = 10;
+	const size_t BoardSize;
 
-	CBoard();
+	CBoard( size_t _BoardSize = 10, size_t _startNumberOfCheckers = 20 );
 
 	std::vector<CField>& GetBoard() { return playBoard; };
 
@@ -20,10 +20,11 @@ public:
 	void Reset();
 
 private:
-	// Количество шашек у каждого игрока в начальный момент.
-	static const size_t startNumberOfCheckers = 20;
+	
+	// Количество шашек у каждого игрока в начальный момент игры.
+	const size_t startNumberOfCheckers;
 
-	// Описывает поле для игры - в игре участвует всего 50 клеток, которые нумеруются в соответствии с определенными правилами.
+	// Описывает поле для игры, содержит описания только черных, которые нумеруются в соответствии с определенными правилами.
 	std::vector<CField> playBoard;
 
 	void generateNewBoard();

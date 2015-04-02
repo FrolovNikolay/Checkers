@@ -75,8 +75,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
-    <ClInclude Include="Field.h" />
     <ClInclude Include="CheckersEngine.h" />
+    <ClInclude Include="Field.h" />
     <ClInclude Include="FieldDrawer.h" />
     <ClInclude Include="FieldWindow.h" />
     <ClInclude Include="MainWindow.h" />

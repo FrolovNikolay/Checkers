@@ -13,7 +13,7 @@ public:
 	~CFieldDrawer();
 
 	// Отрисовка в окне window поля доски в соответствии с содержанием field.
-	void DrawField( HWND window, const CField& field ) const;
+	void DrawField( const CField& field ) const;
 
 private:
 	// Для отрисовки фигур.
@@ -36,6 +36,6 @@ private:
 	// Отступ, при отрисовке дамок.
 	static const int kingIndent = 5;
 
-	void drawBackground( HWND window, HDC tempHDC, const CField& field, RECT rectInfo ) const;
-	void drawChecker( HDC tempHDC, const CField& field, RECT rectInfo ) const;
+	void drawBackground( const CField& field, HDC tempHDC, RECT rectInfo ) const;
+	void drawChecker( const CField& field, HDC tempHDC, RECT rectInfo ) const;
 };

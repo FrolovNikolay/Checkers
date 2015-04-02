@@ -6,6 +6,7 @@
 
 #include <FieldWindow.h>
 #include <Board.h>
+#include <CheckersEngine.h>
 
 #include <Windows.h>
 #include <vector>
@@ -32,14 +33,22 @@ private:
 
 	// Размер одного поля.
 	static const int fieldSize = 65;
+	// Определяет размеры игровой доски.
+	static const int boardSize = 10;
+	// Количество шашек у каждого игрока в начале игры.
+	static const int startNumberOfCheckers = 20;
 	// Высота и ширина окна.
-	static const int height = CBoard::BoardSize * fieldSize + 30;
-	static const int width = CBoard::BoardSize * fieldSize + 200;
+	static const int height = boardSize * fieldSize + 25;
+	static const int width = boardSize * fieldSize + 5;
 	
 	// Игровое поле.
 	CBoard board;
 	// Поля, которые учавствуют в игре.
 	std::vector<CFieldWindow> fields;
+
+	CCheckersEngine engine;
+
+	int focusedWindowIdx;
 
 	void createChildren( HWND hwnd );
 

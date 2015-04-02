@@ -3,11 +3,13 @@
 #include <MainWindow.h>
 
 CMainWindow::CMainWindow()
-	: board()
+	: board( boardSize, startNumberOfCheckers )
 	, fields()
+	, focusedWindowIdx( -1 )
+	, engine( board )
 {
-	for( size_t  i = 0; i < CBoard::BoardSize * CBoard::BoardSize / 2; ++i ) {
-		fields.push_back( CFieldWindow( board.GetBoard()[i] ) );
+	for( size_t  i = 0; i < board.BoardSize * board.BoardSize / 2; ++i ) {
+		fields.push_back( CFieldWindow( board.GetBoard()[i], focusedWindowIdx, engine ) );
 	}
 }
 
@@ -29,7 +31,6 @@ bool CMainWindow::RegisterClass()
     windowWND.hIconSm = 0;
 
     return ::RegisterClassEx( &windowWND ) != 0;
-
 }
 
 bool CMainWindow::Create()
@@ -56,7 +57,7 @@ void CMainWindow::OnDestroy() const
 // Генерация дочерних окон на основе массива игровых полей.
 void CMainWindow::createChildren( HWND hwnd )
 {
-	size_t numberOfCheckersInOneLine = CBoard::BoardSize / 2;
+	size_t numberOfCheckersInOneLine = boardSize / 2;
 	for( size_t i = 0; i < fields.size(); ++i ) {
 		int xStart = ( ( i % numberOfCheckersInOneLine ) * 2 + ( ( i / numberOfCheckersInOneLine + 1 ) % 2 ) ) * fieldSize;
 		int yStart = i / numberOfCheckersInOneLine * fieldSize;
