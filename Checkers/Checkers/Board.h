@@ -10,7 +10,7 @@
 class CBoard {
 public:
 	// Размер доски.
-	const size_t BoardSize;
+	const int BoardSize;
 
 	CBoard( size_t _BoardSize = 10, size_t _startNumberOfCheckers = 20 );
 

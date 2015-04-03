@@ -7,7 +7,7 @@ CBoard::CBoard( size_t _BoardSize, size_t _startNumberOfCheckers )
 	: BoardSize( _BoardSize )
 	, startNumberOfCheckers( _startNumberOfCheckers )
 {
-	for( size_t i = 0; i < BoardSize * BoardSize / 2; ++i ) {
+	for( int i = 0; i < BoardSize * BoardSize / 2; ++i ) {
 		playBoard.push_back( CField( i ) );
 	}
 	generateNewBoard();

@@ -8,7 +8,7 @@ CMainWindow::CMainWindow()
 	, focusedWindowIdx( -1 )
 	, engine( board )
 {
-	for( size_t  i = 0; i < board.BoardSize * board.BoardSize / 2; ++i ) {
+	for( int  i = 0; i < board.BoardSize * board.BoardSize / 2; ++i ) {
 		fields.push_back( CFieldWindow( board.GetBoard()[i], focusedWindowIdx, engine ) );
 	}
 }
@@ -76,6 +76,7 @@ LRESULT __stdcall CMainWindow::mainWindowProc( HWND hwnd, UINT message, WPARAM w
 			break;
 		case WM_CREATE:
             window->createChildren( hwnd );
+			window->engine.StartGame();
 			return 1;
 		case WM_DESTROY:
 			window->OnDestroy();
