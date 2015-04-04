@@ -89,7 +89,7 @@ void CCheckersEngine::calculateNextTurn()
 	// Здесь каждое поле описывается парой вида <Состояние поля; является ли пешка на поле дамкой>.
 	shortcutPlayBoard.resize( playBoard.size() );
 	for( size_t i = 0; i < playBoard.size(); ++i ) {
-		shortcutPlayBoard[i] = std::pair<FieldCondition, bool>( playBoard[i].Condition, playBoard[i].IsKing );
+		shortcutPlayBoard[i] = std::pair<TFieldCondition, bool>( playBoard[i].Condition, playBoard[i].IsKing );
 	}
 
 	if( isWhiteTurn ) {

@@ -6,7 +6,7 @@
 
 #include <Windows.h>
 
-enum FieldCondition {
+enum TFieldCondition {
 	FC_Empty,
 	FC_WhiteChecker,
 	FC_BlackChecker
@@ -14,7 +14,7 @@ enum FieldCondition {
 
 struct CField {
 public:
-	CField( int _Name, FieldCondition _Condition = FC_Empty, bool _IsKing = false, bool _HasBorder = false,
+	CField( int _Name, TFieldCondition _Condition = FC_Empty, bool _IsKing = false, bool _HasBorder = false,
 			HWND window = 0 )
 		: Name( _Name )
 		, Condition( _Condition )
@@ -25,7 +25,7 @@ public:
 	// Номер поля на доске.
 	int Name;
 	// Отвечает за наличие/отсутствие фигур в данном поле.
-	FieldCondition Condition;
+	TFieldCondition Condition;
 	// Флаг отвечает за то, является ли данная шашка дамкой.
 	bool IsKing;
 	// Выделено ли данное поле, как одно из возможных для хода.

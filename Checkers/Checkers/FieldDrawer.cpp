@@ -9,9 +9,9 @@ CFieldDrawer::CFieldDrawer()
 	kingWhiteBrush = ::CreateSolidBrush( RGB( 255, 255, 255 ) );
 	blackBrush = ::CreateSolidBrush( RGB( 102, 102, 102 ) );
 	kingBlackBrush = ::CreateSolidBrush( RGB( 51, 51, 51 ) );
-
-	backgroundBrush = ::CreateSolidBrush( RGB( 85, 102, 114 ) ) ;
-	backgroundPen = ::CreatePen( PS_SOLID, 10, RGB( 85, 102, 114 ) );
+	
+	backgroundBrush = ::CreateSolidBrush( RGB( 184, 115, 51 ) ) ;
+	backgroundPen = ::CreatePen( PS_SOLID, 10, RGB( 184, 115, 51 ) );
 
 	focusedPen = ::CreatePen( PS_SOLID, 5, RGB( 51, 255, 0 ) );
 	availablePen = ::CreatePen( PS_SOLID, 5, RGB( 255, 255, 0 ) );

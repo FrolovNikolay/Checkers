@@ -11,7 +11,7 @@
 #include <deque>
 #include <list>
 
-enum GameResult {
+enum TGameResult {
 	GR_StillPlaying,
 	GR_WhiteWon,
 	GR_BlackWon,
@@ -38,13 +38,13 @@ private:
 	// Определяет чей сейчас ход.
 	bool isWhiteTurn;
 	// В данную переменную попадает состояние игры.
-	GameResult result;
+	TGameResult result;
 
 	// Здесь кешируется информация, связанные с вычислением следующих возможных ходов.
 	std::map< int, std::list< std::deque<int> > > possibleTurns;
-	std::vector< std::pair<FieldCondition, bool> > shortcutPlayBoard;
-	FieldCondition ally;
-	FieldCondition enemy;
+	std::vector< std::pair<TFieldCondition, bool> > shortcutPlayBoard;
+	TFieldCondition ally;
+	TFieldCondition enemy;
 
 	// Отображение клеток в массивы клеток, которые находятся с данной на одной диагонали.
 	// В каждом случае может быть до четырех таких массивов, в которых хранятся клетки
@@ -57,9 +57,9 @@ private:
 	void calculateNextTurn();
 	// Расчитываем возможный ход из поля fieldIdx.
 	void calculatePossibleTurnsForField( int fieldIdx );
-	// Обработка хода обычной шашки, находящейся на поле fieldIdx, calculatedTurn - уже рассчитанная часть хода.
+	// Расчет хода обычной шашки, находящейся на поле fieldIdx, calculatedTurn - уже рассчитанная часть хода.
 	void calculateNonKingTurn( int fieldIdx, std::deque<int>& calculatedTurn );
-	// Обработка хода дамки, находящейся на поле fieldIdx, calculatedTurn - уже рассчитанная часть хода.
+	// Расчет хода дамки, находящейся на поле fieldIdx, calculatedTurn - уже рассчитанная часть хода.
 	void calculateKingTurn( int fieldIdx, std::deque<int>& calculatedTurn );
 
 	// Получить элемент отображения calculatedNonKingNeighbourFields, связанный с клеткой fieldIdx.
