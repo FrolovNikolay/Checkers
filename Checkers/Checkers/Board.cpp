@@ -3,7 +3,7 @@
 #include <Board.h>
 #include <cassert>
 
-CBoard::CBoard( size_t _BoardSize, size_t _startNumberOfCheckers )
+CBoard::CBoard( int _BoardSize, int _startNumberOfCheckers )
 	: BoardSize( _BoardSize )
 	, startNumberOfCheckers( _startNumberOfCheckers )
 {
@@ -21,7 +21,7 @@ void CBoard::Reset()
 // Создание доски для новой игры.
 void CBoard::generateNewBoard()
 {
-	for( size_t i = 0; i < startNumberOfCheckers; ++i ) {
+	for( int i = 0; i < startNumberOfCheckers; ++i ) {
 		playBoard[i].Condition = FC_BlackChecker;
 		playBoard[playBoard.size() - 1 - i].Condition = FC_WhiteChecker;
 	}

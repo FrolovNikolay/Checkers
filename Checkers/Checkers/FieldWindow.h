@@ -23,12 +23,13 @@ public:
     void Show( int cmdShow ) const;
 
 protected:
+	// Обработка сообщения WM_DESTROY.
     void OnDestroy() const;
-
+	// Обработка сообщения WM_PAINT.
 	void OnPaint() const;
-
+	// Обработка сообщения WM_LBUTTONDOWN.
 	void OnLButtonDown() const;
-
+	// Обработка сообщения WM_KILLFOCUS
 	void OnKillFocus() const;
 
 private:
@@ -39,9 +40,9 @@ private:
 	static const CFieldDrawer drawer;
 	// Соответствующее данному окну игровое поле.
 	CField& windowField;
-
+	// Текущее выделенное окно.
 	mutable int& focusedWindowIdx;
-
+	// Класс логики работы.
 	CCheckersEngine& engine;
 
     static LRESULT __stdcall fieldWindowProc( HWND hanlde, UINT message, WPARAM wParam, LPARAM lParam );

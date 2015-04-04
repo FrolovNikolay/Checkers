@@ -34,6 +34,7 @@ public:
 private:
 	// Описание игровой доски.
 	CBoard& board;
+	std::vector<CField>& playBoard;
 	// Определяет чей сейчас ход.
 	bool isWhiteTurn;
 	// В данную переменную попадает состояние игры.
@@ -52,21 +53,24 @@ private:
 	// Определяет есть ли доступные взятия в следующем ходу.
 	mutable bool isTurnHasTakings;
 
-	// Проверка на то, закончена ли игра.
-	bool isGameFinished();
 	// Рассчитать возможные следующие ходы.
 	void calculateNextTurn();
 	// Расчитываем возможный ход из поля fieldIdx.
 	void calculatePossibleTurnsForField( int fieldIdx );
+	// Обработка хода обычной шашки, находящейся на поле fieldIdx, calculatedTurn - уже рассчитанная часть хода.
+	void calculateNonKingTurn( int fieldIdx, std::deque<int>& calculatedTurn );
+	// Обработка хода дамки, находящейся на поле fieldIdx, calculatedTurn - уже рассчитанная часть хода.
+	void calculateKingTurn( int fieldIdx, std::deque<int>& calculatedTurn );
 
 	// Получить элемент отображения calculatedNonKingNeighbourFields, связанный с клеткой fieldIdx.
+	// Если он еще не определен, то рассчитать его.
 	const std::vector< std::vector<int> >& calculateNeighbourFields( int fieldIdx ) const;
 
-	// Попытка добавить к возможным ходам ход, описываемыый последовательностью calculatedTurn.
+	// Попытка добавить к возможным ходам ход, описываемый последовательностью calculatedTurn.
 	// Ход невозможно добавить, если уже есть ходы, в которых происходит больше взятий, чем в описанном.
 	void tryAddTurn( int fromField, std::deque<int>& calculatedTurn );
-
-	void handleNonKingTurn( int fieldIdx, std::deque<int>& calculatedTurn );
-	
-	void handleKingTurn( int fieldIdx, std::deque<int>& calculatedTurn );
+	// Выполняем ход из from в to, для которого уже определена доступность.
+	void makePossibleTurn( int from, int to );
+	// Завершаем ход или обрабатываем его остаток, в зависимости от содержания массива restOfTurns.
+	void handleRestOfTurns( int newTurnPosition, std::list< std::deque<int> >& restOfTurns );
 };

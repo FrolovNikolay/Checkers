@@ -15,13 +15,13 @@ class CMainWindow {
 public:
 	CMainWindow();
 
-	// регистрация класса окна
+	// Регистрация класса окна.
     static bool RegisterClass();
 
-    // создание экземпляра окна
+    // Создание экземпляра окна.
     bool Create();
 
-    // показать окно
+    // Показать окно.
     void Show( int cmdShow ) const;
 
 protected:
@@ -45,11 +45,12 @@ private:
 	CBoard board;
 	// Поля, которые учавствуют в игре.
 	std::vector<CFieldWindow> fields;
-
+	// Класс, отвечающий за логику игры.
 	CCheckersEngine engine;
-
+	// Номер выбранного пользователем доступного для хода окна.
+	// Если еще не выбрано ни одно таковое, то -1.
 	int focusedWindowIdx;
-
+	// Создание массива дочерных окон, каждое из которых отвечает за одну игровую клетку.
 	void createChildren( HWND hwnd );
 
     static LRESULT __stdcall mainWindowProc( HWND hanlde, UINT message, WPARAM wParam, LPARAM lParam );
