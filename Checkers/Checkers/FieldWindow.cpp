@@ -59,15 +59,18 @@ void CFieldWindow::OnPaint() const
 void CFieldWindow::OnLButtonDown() const
 {
 	if( windowField.HasBorder ) {
+		// Если до этого была выделена клетка, то возмозно пытаются совершить ход.
 		if( focusedWindowIdx != -1 && focusedWindowIdx != windowField.Name ) {
 			engine.TryTurn( focusedWindowIdx, windowField.Name );
 		}
+		// Если после попытки хода, поле осталось выделено, значит либо ход совершить не удалось
+		// либо ход соврешить удалось, но его можно продолжить.
 		if( windowField.HasBorder ) {
 			::SetFocus( handle );
 			focusedWindowIdx = windowField.Name;
 			engine.AddFocus( focusedWindowIdx );
 		} else {
-			engine.DelFocus( focusedWindowIdx );
+			// Если выделение пропало - значит ход завершен убраны все старые выделения.
 			focusedWindowIdx = -1;
 		}
 	}
@@ -81,12 +84,12 @@ void CFieldWindow::OnKillFocus() const
 	engine.DelFocus( windowField.Name );
 }
 
-LRESULT __stdcall CFieldWindow::fieldWindowProc( HWND handle, UINT message, WPARAM wParam, LPARAM lParam ) 
+LRESULT __stdcall CFieldWindow::fieldWindowProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam ) 
 {
-	CFieldWindow* window = reinterpret_cast<CFieldWindow*>( ::GetWindowLong( handle, GWL_USERDATA ) );
+	CFieldWindow* window = reinterpret_cast<CFieldWindow*>( ::GetWindowLong( hwnd, GWL_USERDATA ) );
 	switch( message ) {
 		case WM_NCCREATE:
-			::SetWindowLong( handle, GWL_USERDATA, reinterpret_cast<LONG>( reinterpret_cast<CREATESTRUCT*>( lParam )->lpCreateParams ) );
+			::SetWindowLong( hwnd, GWL_USERDATA, reinterpret_cast<LONG>( reinterpret_cast<CREATESTRUCT*>( lParam )->lpCreateParams ) );
 			return 1;
 		case WM_DESTROY:
 			window->OnDestroy();
@@ -101,7 +104,7 @@ LRESULT __stdcall CFieldWindow::fieldWindowProc( HWND handle, UINT message, WPAR
 			window->OnKillFocus();
 			break;
 		default:
-			return ::DefWindowProc( handle, message, wParam, lParam );
+			return ::DefWindowProc( hwnd, message, wParam, lParam );
 			break;
 	}
 	return 0;

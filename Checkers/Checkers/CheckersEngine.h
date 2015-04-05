@@ -30,11 +30,15 @@ public:
 	void AddFocus( int fieldIdx );
 	// Отменить выделение для клетки fieldIdx и прекратить отображение возможных из нее ходов.
 	void DelFocus( int fieldIdx );
+	//
+	void SetMainWindowHandle( HWND handle ) { mainWindowHandle = handle; }
 	
 private:
 	// Описание игровой доски.
 	CBoard& board;
 	std::vector<CField>& playBoard;
+	// Описатель главного окна игры.
+	HWND mainWindowHandle;
 	// Определяет чей сейчас ход.
 	bool isWhiteTurn;
 	// В данную переменную попадает состояние игры.
@@ -73,4 +77,18 @@ private:
 	void makePossibleTurn( int from, int to );
 	// Завершаем ход или обрабатываем его остаток, в зависимости от содержания массива restOfTurns.
 	void handleRestOfTurns( int newTurnPosition, std::list< std::deque<int> >& restOfTurns );
+
+	//
+	bool hasDraw();
+	//
+	bool checkDrawCondition1();
+	//
+	bool checkDrawCondition2();
+	//
+	bool checkDrawCondition3();
+	//
+	bool checkDrawCondition4();
+
+	// Конец партии. Сообщаем игрокам о результате.
+	void endGame();
 };

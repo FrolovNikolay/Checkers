@@ -16,9 +16,13 @@ void CCheckersEngine::StartGame()
 {
 	// Выставляем все параметры в стартовое состояние.
 	board.Reset();
+	possibleTurns.clear();
 	isWhiteTurn = true;
 	result = GR_StillPlaying;
 	isTurnHasTakings = false;
+	for( size_t i = 0; i < playBoard.size(); ++i ) {
+		::InvalidateRect( playBoard[i].Window, 0, true );
+	}
 
 	// Начинаем игру, запуская расчет доступных первых ходов.
 	calculateNextTurn();
@@ -113,7 +117,7 @@ void CCheckersEngine::calculateNextTurn()
 		} else {
 			result = GR_WhiteWon;
 		}
-		// EndGame();
+		endGame();
 		return;
 	}
 
@@ -326,14 +330,67 @@ void CCheckersEngine::handleRestOfTurns( int newTurnPosition, std::list< std::de
 		// Если ход закончен, то проверяем, не превратилась ли шашка в дамку.
 		if( !playBoard[newTurnPosition].IsKing ) {
 			if( ( newTurnPosition < board.BoardSize / 2 && isWhiteTurn ) 
-				|| ( newTurnPosition > ( static_cast<int>( playBoard.size() ) - board.BoardSize / 2 ) && !isWhiteTurn ) ) {
+				|| ( newTurnPosition >= ( static_cast<int>( playBoard.size() ) - board.BoardSize / 2 ) && !isWhiteTurn ) ) {
 				playBoard[newTurnPosition].IsKing = true;
 				::InvalidateRect( playBoard[newTurnPosition].Window, 0, true );
 			}
+		}
+		// Ход завершен. Проверяем выполнения одного из условий ничьи.
+		if( hasDraw() ) {
+			endGame();
+			return;
 		}
 		// Если ход окончен, то передаем ход другой стороне и рассчитываем ее доступные ходы.
 		isWhiteTurn = !isWhiteTurn;
 		isTurnHasTakings = false;
 		calculateNextTurn();
+	}
+}
+
+bool CCheckersEngine::hasDraw()
+{
+	if( checkDrawCondition1() || checkDrawCondition2() || checkDrawCondition3() || checkDrawCondition4() ) {
+		result = GR_Draw;
+		return true;
+	}
+	return false;
+}
+
+bool CCheckersEngine::checkDrawCondition1()
+{
+	return false;
+}
+
+bool CCheckersEngine::checkDrawCondition2()
+{
+	return false;
+}
+
+bool CCheckersEngine::checkDrawCondition3()
+{
+	return false;
+}
+
+bool CCheckersEngine::checkDrawCondition4()
+{
+	return false;
+}
+
+void CCheckersEngine::endGame()
+{
+	wchar_t* message = 0;
+	if( result != GR_Draw ) {
+		if( result == GR_BlackWon ) {
+			message = L"Поздравляем! Черные победили!\nХотите начать новую партию?";
+		} else {
+			message = L"Поздравляем! Белые победили!\nХотите начать новую партию?";
+		}
+		int answer;
+		answer = ::MessageBox( mainWindowHandle, message, L"Ура! Победа!", MB_YESNO );
+		if( answer == IDYES ) {
+			StartGame();
+		}
+	} else {
+
 	}
 }

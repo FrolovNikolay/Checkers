@@ -45,5 +45,5 @@ private:
 	// Класс логики работы.
 	CCheckersEngine& engine;
 
-    static LRESULT __stdcall fieldWindowProc( HWND hanlde, UINT message, WPARAM wParam, LPARAM lParam );
+    static LRESULT __stdcall fieldWindowProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
 };

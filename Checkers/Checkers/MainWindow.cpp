@@ -35,8 +35,11 @@ bool CMainWindow::RegisterClass()
 
 bool CMainWindow::Create()
 {
+	int realWidth = width + ::GetSystemMetrics( SM_CXSIZEFRAME ) * 2 + ::GetSystemMetrics( SM_CXPADDEDBORDER ) * 2;
+	int realHeight = height + ::GetSystemMetrics( SM_CYCAPTION ) + ::GetSystemMetrics( SM_CYSIZEFRAME ) * 2 + ::GetSystemMetrics( SM_CXPADDEDBORDER ) * 2;
     handle = ::CreateWindowEx( 0, L"CMainWindow", L"Checkers", WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-		0, 0, width, height, 0, 0, static_cast<HINSTANCE>( ::GetModuleHandle( 0 ) ), this );
+		0, 0, realWidth, realHeight, 0, 0, static_cast<HINSTANCE>( ::GetModuleHandle( 0 ) ), this );
+	engine.SetMainWindowHandle( handle );
 
     return handle != 0;
 }
@@ -80,6 +83,11 @@ LRESULT __stdcall CMainWindow::mainWindowProc( HWND hwnd, UINT message, WPARAM w
 			return 1;
 		case WM_DESTROY:
 			window->OnDestroy();
+			break;
+		case WM_WINDOWPOSCHANGED:
+			for( auto& ptr : window->board.GetBoard() ) {
+				::InvalidateRect( ptr.Window, 0, true );
+			}
 			break;
 		default:
 			return ::DefWindowProc( hwnd, message, wParam, lParam );

@@ -21,6 +21,10 @@ void CBoard::Reset()
 // Создание доски для новой игры.
 void CBoard::generateNewBoard()
 {
+	for( size_t i = 0; i < playBoard.size(); ++i ) {
+		playBoard[i].HasBorder = false;
+		playBoard[i].IsKing = false;
+	}
 	for( int i = 0; i < startNumberOfCheckers; ++i ) {
 		playBoard[i].Condition = FC_BlackChecker;
 		playBoard[playBoard.size() - 1 - i].Condition = FC_WhiteChecker;

@@ -38,8 +38,8 @@ private:
 	// Количество шашек у каждого игрока в начале игры.
 	static const int startNumberOfCheckers = 20;
 	// Высота и ширина окна.
-	static const int height = boardSize * fieldSize + 25;
-	static const int width = boardSize * fieldSize + 5;
+	static const int height = boardSize * fieldSize;
+	static const int width = boardSize * fieldSize;
 	
 	// Игровое поле.
 	CBoard board;
