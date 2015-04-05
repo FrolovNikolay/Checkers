@@ -5,6 +5,7 @@
 #pragma once
 
 #include <Field.h>
+
 #include <Windows.h>
 
 class CFieldDrawer {

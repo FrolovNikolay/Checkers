@@ -1,6 +1,7 @@
 ﻿// Автор: Николай Фролов.
 
 #include <Board.h>
+
 #include <cassert>
 
 CBoard::CBoard( int _BoardSize, int _startNumberOfCheckers )

@@ -1,6 +1,7 @@
 ﻿// Автор: Николай Фролов.
 
 #include <FieldDrawer.h>
+
 #include <cassert>
 
 CFieldDrawer::CFieldDrawer()

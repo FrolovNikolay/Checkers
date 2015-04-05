@@ -5,6 +5,7 @@
 #pragma once
 
 #include <Field.h>
+
 #include <vector>
 
 class CBoard {
