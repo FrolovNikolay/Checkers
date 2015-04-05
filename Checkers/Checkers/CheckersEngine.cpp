@@ -416,7 +416,7 @@ bool CCheckersEngine::checkDrawCondition2()
 	return false;
 }
 
-// Очитска данных о ничьи. Выполняется при запуске новой игры.
+// Очистка данных о ничьи. Выполняется при запуске новой игры.
 void CCheckersEngine::clearDrawCheck()
 {
 	numberOfTurnsWithOnlyKings = 0;
