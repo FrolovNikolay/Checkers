@@ -10,6 +10,7 @@
 #include <vector>
 #include <deque>
 #include <list>
+#include <string>
 
 enum TGameResult {
 	GR_StillPlaying,
@@ -30,10 +31,17 @@ public:
 	void AddFocus( int fieldIdx );
 	// Отменить выделение для клетки fieldIdx и прекратить отображение возможных из нее ходов.
 	void DelFocus( int fieldIdx );
-	//
+	// Установка описателя главного окна. Нужно для модальности бокса завершения игры.
 	void SetMainWindowHandle( HWND handle ) { mainWindowHandle = handle; }
 	
 private:
+	// Описывает какая из-за какой причины объявлена ничья.
+	// Номера соответствуют функциям проверки 1-2 соответственно.
+	enum TDrawReason {
+		DR_Condition1,
+		DR_Condition2,
+	};
+
 	// Описание игровой доски.
 	CBoard& board;
 	std::vector<CField>& playBoard;
@@ -43,6 +51,8 @@ private:
 	bool isWhiteTurn;
 	// В данную переменную попадает состояние игры.
 	TGameResult result;
+	// В данную переменную попадает причина ничьи.
+	TDrawReason drawReason;
 
 	// Здесь кешируется информация, связанные с вычислением следующих возможных ходов.
 	std::map< int, std::list< std::deque<int> > > possibleTurns;
@@ -56,6 +66,12 @@ private:
 	mutable std::map< int, std::vector< std::vector<int> > > calculatedNeighbourFields;
 	// Определяет есть ли доступные взятия в следующем ходу.
 	mutable bool isTurnHasTakings;
+
+	//Следующие параметры нужны для определения выполнения условий ничьи.
+	// Счетчик для условия 25 ходов только дамками без взятий.
+	int numberOfTurnsWithOnlyKings;
+	// Отображение позиций на доске в количество их повторений. Текущее состояние доски кодируется строкой.
+	std::map<std::string, int> finishedTurns;
 
 	// Рассчитать возможные следующие ходы.
 	void calculateNextTurn();
@@ -78,16 +94,14 @@ private:
 	// Завершаем ход или обрабатываем его остаток, в зависимости от содержания массива restOfTurns.
 	void handleRestOfTurns( int newTurnPosition, std::list< std::deque<int> >& restOfTurns );
 
-	//
-	bool hasDraw();
-	//
-	bool checkDrawCondition1();
-	//
+	// Проверяет выполнение условий ничьи.
+	void checkDraw( int finishedTurnField );
+	// Игроки в течение 25 ходов делали ходы только дамками, не передвигая простых шашек и не производя взятия.
+	bool checkDrawCondition1( int finishedTurnField );
+	// Три раза повторяется одна и та же позиция, причём очередь хода каждый раз будет за одной и той же стороной.
 	bool checkDrawCondition2();
-	//
-	bool checkDrawCondition3();
-	//
-	bool checkDrawCondition4();
+	// Очитска данных о ничьи. Выполняется при запуске новой игры.
+	void clearDrawCheck();
 
 	// Конец партии. Сообщаем игрокам о результате.
 	void endGame();

@@ -4,6 +4,7 @@
 #include <Board.h>
 
 #include <algorithm>
+#include <cassert>
 
 CCheckersEngine::CCheckersEngine( CBoard& _board )
 	: board( _board )
@@ -17,6 +18,7 @@ void CCheckersEngine::StartGame()
 	// Выставляем все параметры в стартовое состояние.
 	board.Reset();
 	possibleTurns.clear();
+	clearDrawCheck();
 	isWhiteTurn = true;
 	isTurnHasTakings = false;
 	::SetFocus( mainWindowHandle );
@@ -117,11 +119,14 @@ void CCheckersEngine::calculateNextTurn()
 	}
 
 	// У текущего игрока нет ни одного допустимого хода(все его шашки взяты/заблокированы), значит он проиграл.
-	if( possibleTurns.empty() ) {
-		if( isWhiteTurn ) {
-			result = GR_BlackWon;
-		} else {
-			result = GR_WhiteWon;
+	// Либо до этого была диагностирована ничья, и ходы все еще остались - то есть победитель не был определен прошлым ходом.
+	if( possibleTurns.empty() || result == GR_Draw ) {
+		if( result != GR_Draw ) {
+			if( isWhiteTurn ) {
+				result = GR_BlackWon;
+			} else {
+				result = GR_WhiteWon;
+			}
 		}
 		endGame();
 		return;
@@ -151,69 +156,6 @@ void CCheckersEngine::calculatePossibleTurnsForField( int fieldIdx )
 		calculateNonKingTurn( fieldIdx, std::deque<int>() );
 	} else {
 		calculateKingTurn( fieldIdx, std::deque<int>() );
-	}
-}
-
-// Получить элемент отображения calculatedNeighbourFields, связанный с клеткой fieldIdx.
-const std::vector< std::vector<int> >& CCheckersEngine::calculateNeighbourFields( int fieldIdx ) const
-{
-	if( calculatedNeighbourFields.find( fieldIdx ) == calculatedNeighbourFields.end() ) {
-		int numberOfCheckersInRow = board.BoardSize / 2;
-		// Для удобства вычислений переводим номер клетки, пару номеров, которая бы соответствовала
-		// клетке в квадратной матрице размером BoardSize * BoardSize.
-		int i = fieldIdx / numberOfCheckersInRow;
-		int j = ( fieldIdx % numberOfCheckersInRow ) * 2 + ( ( fieldIdx / numberOfCheckersInRow + 1 ) % 2 );
-		std::vector<int> currentDiag;
-
-		// Пытаемся поочередной добавить в порядке удаления соседей о всех четырех полудиагоналей.
-		for( int k = 1; k < std::min<int>( i + 1, j + 1 ); ++k ) {
-			currentDiag.push_back( ( i - k ) * numberOfCheckersInRow + ( j - k ) / 2 );
-		}
-		if( !currentDiag.empty() ) {
-			calculatedNeighbourFields[fieldIdx].push_back( currentDiag );
-			currentDiag.clear();
-		}
-
-		for( int k = 1; k < std::min<int>( i + 1, board.BoardSize - j ); ++k ) {
-			currentDiag.push_back( ( i - k ) * numberOfCheckersInRow + ( j + k ) / 2 );
-		}
-		if( !currentDiag.empty() ) {
-			calculatedNeighbourFields[fieldIdx].push_back( currentDiag );
-			currentDiag.clear();
-		}
-
-		for( int k = 1; k < std::min<int>( board.BoardSize - i, j + 1 ); ++k ) {
-			currentDiag.push_back( ( i + k ) * numberOfCheckersInRow + ( j - k ) / 2 );
-		}
-		if( !currentDiag.empty() ) {
-			calculatedNeighbourFields[fieldIdx].push_back( currentDiag );
-			currentDiag.clear();
-		}
-
-		for( int k = 1; k < std::min<int>( board.BoardSize - i, board.BoardSize - j ); ++k ) {
-			currentDiag.push_back( ( i + k ) * numberOfCheckersInRow + ( j + k ) / 2 );
-		}
-		if( !currentDiag.empty() ) {
-			calculatedNeighbourFields[fieldIdx].push_back( currentDiag );
-		}
-	}
-	return calculatedNeighbourFields[fieldIdx];
-}
-
-// Попытка добавить к возможным ходам ход, описываемыый последовательностью calculatedTurn.
-// Ход невозможно добавить, если уже есть ходы, в которых происходит больше взятий, чем в описанном.
-void CCheckersEngine::tryAddTurn( int fromField, std::deque<int>& calculatedTurn )
-{
-	// Если размер последовательности больше 1, то есть взятия .
-	if( calculatedTurn.size() > 1 ) {
-		isTurnHasTakings = true;
-	}
-	// Проверяем, что в возможные ходы в соответствие с правилами попадут лишь ходы с наибольшим числом взятий.
-	if( possibleTurns.empty() || possibleTurns.begin()->second.begin()->size() == calculatedTurn.size() ) {
-		possibleTurns[fromField].push_back( calculatedTurn );
-	} else if( possibleTurns.begin()->second.begin()->size() < calculatedTurn.size() ) {
-		possibleTurns.clear();
-		possibleTurns[fromField].push_back( calculatedTurn );
 	}
 }
 
@@ -303,6 +245,69 @@ void CCheckersEngine::calculateKingTurn( int fieldIdx, std::deque<int>& calculat
 	}
 }
 
+// Получить элемент отображения calculatedNeighbourFields, связанный с клеткой fieldIdx.
+const std::vector< std::vector<int> >& CCheckersEngine::calculateNeighbourFields( int fieldIdx ) const
+{
+	if( calculatedNeighbourFields.find( fieldIdx ) == calculatedNeighbourFields.end() ) {
+		int numberOfCheckersInRow = board.BoardSize / 2;
+		// Для удобства вычислений переводим номер клетки, пару номеров, которая бы соответствовала
+		// клетке в квадратной матрице размером BoardSize * BoardSize.
+		int i = fieldIdx / numberOfCheckersInRow;
+		int j = ( fieldIdx % numberOfCheckersInRow ) * 2 + ( ( fieldIdx / numberOfCheckersInRow + 1 ) % 2 );
+		std::vector<int> currentDiag;
+
+		// Пытаемся поочередной добавить в порядке удаления соседей о всех четырех полудиагоналей.
+		for( int k = 1; k < std::min<int>( i + 1, j + 1 ); ++k ) {
+			currentDiag.push_back( ( i - k ) * numberOfCheckersInRow + ( j - k ) / 2 );
+		}
+		if( !currentDiag.empty() ) {
+			calculatedNeighbourFields[fieldIdx].push_back( currentDiag );
+			currentDiag.clear();
+		}
+
+		for( int k = 1; k < std::min<int>( i + 1, board.BoardSize - j ); ++k ) {
+			currentDiag.push_back( ( i - k ) * numberOfCheckersInRow + ( j + k ) / 2 );
+		}
+		if( !currentDiag.empty() ) {
+			calculatedNeighbourFields[fieldIdx].push_back( currentDiag );
+			currentDiag.clear();
+		}
+
+		for( int k = 1; k < std::min<int>( board.BoardSize - i, j + 1 ); ++k ) {
+			currentDiag.push_back( ( i + k ) * numberOfCheckersInRow + ( j - k ) / 2 );
+		}
+		if( !currentDiag.empty() ) {
+			calculatedNeighbourFields[fieldIdx].push_back( currentDiag );
+			currentDiag.clear();
+		}
+
+		for( int k = 1; k < std::min<int>( board.BoardSize - i, board.BoardSize - j ); ++k ) {
+			currentDiag.push_back( ( i + k ) * numberOfCheckersInRow + ( j + k ) / 2 );
+		}
+		if( !currentDiag.empty() ) {
+			calculatedNeighbourFields[fieldIdx].push_back( currentDiag );
+		}
+	}
+	return calculatedNeighbourFields[fieldIdx];
+}
+
+// Попытка добавить к возможным ходам ход, описываемыый последовательностью calculatedTurn.
+// Ход невозможно добавить, если уже есть ходы, в которых происходит больше взятий, чем в описанном.
+void CCheckersEngine::tryAddTurn( int fromField, std::deque<int>& calculatedTurn )
+{
+	// Если размер последовательности больше 1, то есть взятия .
+	if( calculatedTurn.size() > 1 ) {
+		isTurnHasTakings = true;
+	}
+	// Проверяем, что в возможные ходы в соответствие с правилами попадут лишь ходы с наибольшим числом взятий.
+	if( possibleTurns.empty() || possibleTurns.begin()->second.begin()->size() == calculatedTurn.size() ) {
+		possibleTurns[fromField].push_back( calculatedTurn );
+	} else if( possibleTurns.begin()->second.begin()->size() < calculatedTurn.size() ) {
+		possibleTurns.clear();
+		possibleTurns[fromField].push_back( calculatedTurn );
+	}
+}
+
 // Выполняем ход из from в to, для которого уже определена доступность.
 void CCheckersEngine::makePossibleTurn( int from, int to )
 {
@@ -342,10 +347,7 @@ void CCheckersEngine::handleRestOfTurns( int newTurnPosition, std::list< std::de
 			}
 		}
 		// Ход завершен. Проверяем выполнения одного из условий ничьи.
-		if( hasDraw() ) {
-			endGame();
-			return;
-		}
+		checkDraw( newTurnPosition );
 		// Если ход окончен, то передаем ход другой стороне и рассчитываем ее доступные ходы.
 		isWhiteTurn = !isWhiteTurn;
 		isTurnHasTakings = false;
@@ -353,35 +355,75 @@ void CCheckersEngine::handleRestOfTurns( int newTurnPosition, std::list< std::de
 	}
 }
 
-bool CCheckersEngine::hasDraw()
+// Проверяет выполнение условий ничьи.
+void CCheckersEngine::checkDraw( int finishedTurnField  )
 {
-	if( checkDrawCondition1() || checkDrawCondition2() || checkDrawCondition3() || checkDrawCondition4() ) {
+	if( checkDrawCondition1( finishedTurnField  ) || checkDrawCondition2()  ) {
 		result = GR_Draw;
+	}
+}
+
+// Игроки в течение 25 ходов делали ходы только дамками, не передвигая простых шашек и не производя взятия.
+bool CCheckersEngine::checkDrawCondition1( int finishedTurnField  )
+{
+	if( !isTurnHasTakings && playBoard[finishedTurnField].IsKing ) {
+		++numberOfTurnsWithOnlyKings;
+	} else {
+		numberOfTurnsWithOnlyKings = 0;
+	}
+	if( numberOfTurnsWithOnlyKings >= 25 ) {
+		drawReason = DR_Condition1;
 		return true;
 	}
 	return false;
 }
 
-bool CCheckersEngine::checkDrawCondition1()
-{
-	return false;
-}
-
+// Три раза повторяется одна и та же позиция, причём очередь хода каждый раз будет за одной и той же стороной.
 bool CCheckersEngine::checkDrawCondition2()
 {
+	// Сокращенное описание доски.
+	std::string boardDescription;
+	// Первый символ описывает того, был последний ход. 0 - белых, 1 - черных.
+	boardDescription.push_back( isWhiteTurn ? '0' : '1' );
+	// Далее 50 символов: 0 - пустое поле, 1 - белая шашка, 2 - белая дамка, 3 - черная шашка, 4 - черная дамка.
+	for( auto& field : playBoard ) {
+		switch( field.Condition ) {
+			case FC_Empty:
+				boardDescription.push_back( '0' );
+				break;
+			case FC_WhiteChecker:
+				if( field.IsKing ) {
+					boardDescription.push_back( '2' );
+				} else {
+					boardDescription.push_back( '1' );
+				}
+				break;
+			case FC_BlackChecker:
+				if( field.IsKing ) {
+					boardDescription.push_back( '4' );
+				} else {
+					boardDescription.push_back( '3' );
+				}
+				break;
+			default:
+				assert( false );
+		}
+	}
+	if( ++finishedTurns[boardDescription] >= 3 ) {
+		drawReason = DR_Condition2;
+		return true;
+	}
 	return false;
 }
 
-bool CCheckersEngine::checkDrawCondition3()
+// Очитска данных о ничьи. Выполняется при запуске новой игры.
+void CCheckersEngine::clearDrawCheck()
 {
-	return false;
+	numberOfTurnsWithOnlyKings = 0;
+	finishedTurns.clear();
 }
 
-bool CCheckersEngine::checkDrawCondition4()
-{
-	return false;
-}
-
+// Конец партии. Сообщаем игрокам о результате.
 void CCheckersEngine::endGame()
 {
 	wchar_t* message = 0;
@@ -394,7 +436,12 @@ void CCheckersEngine::endGame()
 			message = L"Congratulations! Whites won!\nDo you want to start a new game?";
 		}
 	} else {
-
+		caption = L"Draw.";
+		if( drawReason == DR_Condition1 ) {
+			message = L"Draw. Reason: 25 turns with only kings without captures.\nDo you want to start a new game?";
+		} else {
+			message = L"Draw. Reason: Same positions occured 3 times.\nDo you want to start a new game?";
+		}
 	}
 	int answer;
 	answer = ::MessageBox( mainWindowHandle, message, caption, MB_YESNO );
