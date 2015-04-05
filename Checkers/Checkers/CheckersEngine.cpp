@@ -18,10 +18,12 @@ void CCheckersEngine::StartGame()
 	board.Reset();
 	possibleTurns.clear();
 	isWhiteTurn = true;
-	result = GR_StillPlaying;
 	isTurnHasTakings = false;
-	for( size_t i = 0; i < playBoard.size(); ++i ) {
-		::InvalidateRect( playBoard[i].Window, 0, true );
+	::SetFocus( mainWindowHandle );
+	result = GR_StillPlaying;
+
+	for( auto& field : playBoard ) {
+		::InvalidateRect( field.Window, 0, true );
 	}
 
 	// Начинаем игру, запуская расчет доступных первых ходов.
@@ -31,11 +33,11 @@ void CCheckersEngine::StartGame()
 void CCheckersEngine::AddFocus( int fieldIdx )
 {
 	// Получаем доступные из данного поля ходы.
-	std::list< std::deque<int> >& possibleTurnForField = possibleTurns[fieldIdx];
+	std::list< std::deque<int> >& possibleTurnsForField = possibleTurns[fieldIdx];
 	// Подсвечиваем и перерисовываем поля, в которые можно совершить ходы из fieldIdx.
-	for( auto iter = possibleTurnForField.begin(); iter != possibleTurnForField.end(); ++iter ) {
-		playBoard[( *iter )[isTurnHasTakings ? 1 : 0]].HasBorder = true;
-		::InvalidateRect( playBoard[( *iter )[isTurnHasTakings ? 1 : 0]].Window, 0, true );
+	for( auto& possibleTurn : possibleTurnsForField ) {
+		playBoard[possibleTurn[isTurnHasTakings ? 1 : 0]].HasBorder = true;
+		::InvalidateRect( playBoard[possibleTurn[isTurnHasTakings ? 1 : 0]].Window, 0, true );
 	}
 	// Перерисовываем само окно с fieldIdx полем - теперь оно выделено другим цветом.
 	::InvalidateRect( playBoard[fieldIdx].Window, 0, true );
@@ -43,12 +45,16 @@ void CCheckersEngine::AddFocus( int fieldIdx )
 
 void CCheckersEngine::DelFocus( int fieldIdx )
 {
+	// Если из данной клетки возможных ходов уже нет, то выделение уже убрано.
+	if( possibleTurns.find( fieldIdx ) == possibleTurns.end() ) {
+		return;
+	}
 	// Получаем доступные из данного поля ходы.
-	std::list< std::deque<int> >& possibleTurnForField = possibleTurns[fieldIdx];
+	std::list< std::deque<int> >& possibleTurnsForField = possibleTurns[fieldIdx];
 	// Убираем подсветку полей, в которые можно совершить ходы из fieldIdx и перерисовываем их.
-	for( auto iter = possibleTurnForField.begin(); iter != possibleTurnForField.end(); ++iter ) {
-		playBoard[( *iter )[isTurnHasTakings ? 1 : 0]].HasBorder = false;
-		::InvalidateRect( playBoard[( *iter )[isTurnHasTakings ? 1 : 0]].Window, 0, true );
+	for( auto& possibleTurn : possibleTurnsForField ) {
+		playBoard[possibleTurn[isTurnHasTakings ? 1 : 0]].HasBorder = false;
+		::InvalidateRect( playBoard[possibleTurn[isTurnHasTakings ? 1 : 0]].Window, 0, true );
 	}
 	// Перерисовываем само окно с fieldIdx полем - теперь у него нет специального выделения.
 	::InvalidateRect( playBoard[fieldIdx].Window, 0, true );
@@ -56,31 +62,31 @@ void CCheckersEngine::DelFocus( int fieldIdx )
 
 void CCheckersEngine::TryTurn( int from, int to )
 {
-	std::list< std::deque<int> >& possibleTurnForField = possibleTurns[from];
+	std::list< std::deque<int> >& possibleTurnsForField = possibleTurns[from];
 	// Флаг - получилось ли сделать ход из поля from в поле to.
-	bool isPossibleTurn = false;
+	bool hasPossibleTurn = false;
 	// Здесь окажутся остатки доступных ходов, в том случае, если доступно множественное взятие.
 	std::list< std::deque<int> > restOfTurns;
-	for( auto iter = possibleTurnForField.begin(); iter != possibleTurnForField.end(); ++iter ) {
+	for( auto& possibleTurn : possibleTurnsForField ) {
 		// В зависимости от того, есть в данном ходу взятие или нет, меняется формат хранения ходов.
-		if( ( *iter )[isTurnHasTakings ? 1 : 0] == to ) {
+		if( possibleTurn[isTurnHasTakings ? 1 : 0] == to ) {
 			// Если взятия есть и нашелся подходящий ход, то нужно снять изъять из описания хода две ячейки: одна их них
 			// содержит номер поля, на котором стоит срубаемая шашка, на другом номер, в которой происходит перемещение.
 			if( isTurnHasTakings ) {
-				playBoard[*iter->begin()].Condition = FC_Empty;
-				playBoard[*iter->begin()].IsKing = false;
-				::InvalidateRect( playBoard[*iter->begin()].Window, 0, true );
-				iter->pop_front();
+				playBoard[*possibleTurn.begin()].Condition = FC_Empty;
+				playBoard[*possibleTurn.begin()].IsKing = false;
+				::InvalidateRect( playBoard[*possibleTurn.begin()].Window, 0, true );
+				possibleTurn.pop_front();
 			}
-			iter->pop_front();
-			if( !iter->empty() ) {
-				restOfTurns.push_back( *iter );
+			possibleTurn.pop_front();
+			if( !possibleTurn.empty() ) {
+				restOfTurns.push_back( possibleTurn );
 			}
-			isPossibleTurn = true;
+			hasPossibleTurn = true;
 		}
 	}
 
-	if( isPossibleTurn ) {
+	if( hasPossibleTurn ) {
 		makePossibleTurn( from, to );
 		handleRestOfTurns( to, restOfTurns );
 	}
@@ -122,17 +128,17 @@ void CCheckersEngine::calculateNextTurn()
 	}
 
 	// Добавляем подсветку к полям, из которых доступны ходы.
-	for( auto iter = possibleTurns.begin(); iter != possibleTurns.end(); ++iter ) {
-		if( iter->first >= 0 ) {
-			playBoard[iter->first].HasBorder = true;
+	for( auto& possibleTurn: possibleTurns ) {
+		if( possibleTurn.first >= 0 ) {
+			playBoard[possibleTurn.first].HasBorder = true;
 		}
 		// Если возможны взятия, то нужно убрать из описаний ходов, некоторую доп. информацию, которая более не нужна.
 		if( isTurnHasTakings ) {
-			for( auto turnIter = iter->second.begin(); turnIter != iter->second.end(); ++turnIter ) {
-				turnIter->pop_front();
+			for( auto& turnWithExtraInfo : possibleTurn.second ) {
+				turnWithExtraInfo.pop_front();
 			}
 		}
-		::InvalidateRect( playBoard[iter->first].Window, 0, true );
+		::InvalidateRect( playBoard[possibleTurn.first].Window, 0, true );
 	}
 }
 
@@ -306,10 +312,10 @@ void CCheckersEngine::makePossibleTurn( int from, int to )
 	playBoard[to].IsKing = playBoard[from].IsKing;
 	playBoard[from].IsKing = false;
 	possibleTurns.clear();
-	for( size_t i = 0; i < playBoard.size(); ++i ) {
-		if( playBoard[i].HasBorder ) {
-			playBoard[i].HasBorder = false;
-			::InvalidateRect( playBoard[i].Window, 0, true );
+	for( auto& field : playBoard ) {
+		if( field.HasBorder ) {
+			field.HasBorder = false;
+			::InvalidateRect( field.Window, 0, true );
 		}
 	}
 }
@@ -319,9 +325,9 @@ void CCheckersEngine::handleRestOfTurns( int newTurnPosition, std::list< std::de
 {
 	// Если ход еще не закончен, то отмечаем новые доступные клетки и обновляем доступные ходы.
 	if( !restOfTurns.empty() ) {
-		for( auto iter = restOfTurns.begin(); iter != restOfTurns.end(); ++iter ) {
-			playBoard[*++iter->begin()].HasBorder = true;
-			::InvalidateRect( playBoard[*++iter->begin()].Window, 0, true );
+		for( auto& turn : restOfTurns) {
+			playBoard[turn[1]].HasBorder = true;
+			::InvalidateRect( playBoard[turn[1]].Window, 0, true );
 		}
 		playBoard[newTurnPosition].HasBorder = true;
 		possibleTurns[newTurnPosition] = restOfTurns;
@@ -379,18 +385,20 @@ bool CCheckersEngine::checkDrawCondition4()
 void CCheckersEngine::endGame()
 {
 	wchar_t* message = 0;
+	wchar_t* caption = 0;
 	if( result != GR_Draw ) {
+		caption = L"Victory!";
 		if( result == GR_BlackWon ) {
-			message = L"Поздравляем! Черные победили!\nХотите начать новую партию?";
+			message = L"Congratulations! Blacks won!\nDo you want to start a new game?";
 		} else {
-			message = L"Поздравляем! Белые победили!\nХотите начать новую партию?";
-		}
-		int answer;
-		answer = ::MessageBox( mainWindowHandle, message, L"Ура! Победа!", MB_YESNO );
-		if( answer == IDYES ) {
-			StartGame();
+			message = L"Congratulations! Whites won!\nDo you want to start a new game?";
 		}
 	} else {
 
+	}
+	int answer;
+	answer = ::MessageBox( mainWindowHandle, message, caption, MB_YESNO );
+	if( answer == IDYES ) {
+		StartGame();
 	}
 }

@@ -53,5 +53,6 @@ private:
 	// Создание массива дочерных окон, каждое из которых отвечает за одну игровую клетку.
 	void createChildren( HWND hwnd );
 
+	static LRESULT __stdcall wmCommandProc( HWND hanlde, UINT message, WPARAM wParam, LPARAM lParam );
     static LRESULT __stdcall mainWindowProc( HWND hanlde, UINT message, WPARAM wParam, LPARAM lParam );
 };

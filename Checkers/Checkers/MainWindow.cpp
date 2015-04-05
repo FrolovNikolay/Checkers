@@ -1,6 +1,7 @@
 ﻿// Автор: Фролов Николай.
 
 #include <MainWindow.h>
+#include <resource.h>
 
 CMainWindow::CMainWindow()
 	: board( boardSize, startNumberOfCheckers )
@@ -26,7 +27,7 @@ bool CMainWindow::RegisterClass()
     windowWND.hIcon = 0;
     windowWND.hCursor = ::LoadCursor( 0, IDC_ARROW );
     windowWND.hbrBackground = ::CreateSolidBrush( RGB( 207, 236, 255 ) );
-    windowWND.lpszMenuName = 0;
+    windowWND.lpszMenuName = MAKEINTRESOURCE( IDR_MENU1 );
     windowWND.lpszClassName = L"CMainWindow";
     windowWND.hIconSm = 0;
 
@@ -36,7 +37,8 @@ bool CMainWindow::RegisterClass()
 bool CMainWindow::Create()
 {
 	int realWidth = width + ::GetSystemMetrics( SM_CXSIZEFRAME ) * 2 + ::GetSystemMetrics( SM_CXPADDEDBORDER ) * 2;
-	int realHeight = height + ::GetSystemMetrics( SM_CYCAPTION ) + ::GetSystemMetrics( SM_CYSIZEFRAME ) * 2 + ::GetSystemMetrics( SM_CXPADDEDBORDER ) * 2;
+	int realHeight = height + ::GetSystemMetrics( SM_CYCAPTION )+ ::GetSystemMetrics( SM_CYSIZEFRAME ) * 2
+		+ ::GetSystemMetrics( SM_CXPADDEDBORDER ) * 2 + ::GetSystemMetrics( SM_CXMENUSIZE );
     handle = ::CreateWindowEx( 0, L"CMainWindow", L"Checkers", WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
 		0, 0, realWidth, realHeight, 0, 0, static_cast<HINSTANCE>( ::GetModuleHandle( 0 ) ), this );
 	engine.SetMainWindowHandle( handle );
@@ -55,6 +57,28 @@ void CMainWindow::Show( int cmdShow ) const
 void CMainWindow::OnDestroy() const
 {
     ::PostQuitMessage( 0 );
+}
+
+LRESULT CMainWindow::wmCommandProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
+{
+	CMainWindow* window = reinterpret_cast<CMainWindow*>( ::GetWindowLong( hwnd, GWL_USERDATA ) );
+
+	switch( HIWORD( wParam ) ) {
+		case 0:
+			switch( LOWORD( wParam ) ) {
+				case ID_MENU_NEWGAME:
+					window->engine.StartGame();
+					break;
+				case ID_MENU_EXIT:
+					window->OnDestroy();
+					break;
+				default:
+					return ::DefWindowProc( hwnd, message, wParam, lParam );
+			}
+		default:
+			return ::DefWindowProc( hwnd, message, wParam, lParam );
+	}
+	return 0;
 }
 
 // Создание массива дочерных окон, каждое из которых отвечает за одну игровую клетку.
@@ -84,6 +108,8 @@ LRESULT __stdcall CMainWindow::mainWindowProc( HWND hwnd, UINT message, WPARAM w
 		case WM_DESTROY:
 			window->OnDestroy();
 			break;
+		case WM_COMMAND:
+			return wmCommandProc( hwnd, message, wParam, lParam);
 		case WM_WINDOWPOSCHANGED:
 			for( auto& ptr : window->board.GetBoard() ) {
 				::InvalidateRect( ptr.Window, 0, true );
@@ -91,7 +117,6 @@ LRESULT __stdcall CMainWindow::mainWindowProc( HWND hwnd, UINT message, WPARAM w
 			break;
 		default:
 			return ::DefWindowProc( hwnd, message, wParam, lParam );
-			break;
     }
     return 0;
 }
